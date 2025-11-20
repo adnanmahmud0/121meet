@@ -6,10 +6,10 @@ import { ISendEmail } from '../types/email';
 const transporter = nodemailer.createTransport({
   host: config.email.host,
   port: Number(config.email.port),
-  secure: false,
+  secure: Number(config.email.port) === 465,
   auth: {
     user: config.email.user,
-    pass: config.email.pass,
+    pass: (config.email.pass || '').replace(/\s+/g, ''),
   },
 });
 

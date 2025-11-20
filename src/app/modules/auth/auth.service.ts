@@ -86,6 +86,7 @@ const forgetPasswordToDB = async (email: string) => {
     expireAt: new Date(Date.now() + 3 * 60000),
   };
   await User.findOneAndUpdate({ email }, { $set: { authentication } });
+  return { otp };
 };
 
 //verify email
