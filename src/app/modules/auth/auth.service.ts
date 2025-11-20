@@ -49,14 +49,19 @@ const loginUserFromDB = async (payload: ILoginData) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
   }
 
-  //create token
-  const createToken = jwtHelper.createToken(
+  //tokens
+  const accessToken = jwtHelper.createToken(
     { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
-    config.jwt.jwt_secret as Secret,
-    config.jwt.jwt_expire_in as SignOptions['expiresIn']
+    (config.jwt.jwt_secret || 'secret') as Secret,
+    (config.jwt.jwt_expire_in || '15m') as SignOptions['expiresIn']
+  );
+  const refreshToken = jwtHelper.createToken(
+    { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
+    (config.jwt.jwt_refresh_secret || config.jwt.jwt_secret || 'secret') as Secret,
+    (config.jwt.jwt_refresh_expire_in || '7d') as SignOptions['expiresIn']
   );
 
-  return { createToken };
+  return { accessToken, refreshToken };
 };
 
 //forget password
@@ -247,10 +252,42 @@ const changePasswordToDB = async (
   await User.findOneAndUpdate({ _id: user.id }, updateData, { new: true });
 };
 
+ 
+//refresh token -> returns new access token
+const refreshTokenToDB = async (token: string) => {
+  if (!token) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Refresh token is required');
+  }
+  const payload = jwtHelper.verifyToken(
+    token,
+    ((config.jwt.jwt_refresh_secret || config.jwt.jwt_secret) as Secret)!
+  ) as JwtPayload;
+
+  const user = await User.findById(payload.id);
+  if (!user) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'User not found');
+  }
+  if (user.status === 'delete') {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      'Account is deactivated, access is forbidden'
+    );
+  }
+
+  const newAccessToken = jwtHelper.createToken(
+    { id: user._id, role: user.role, email: user.email },
+    (config.jwt.jwt_secret || 'secret') as Secret,
+    (config.jwt.jwt_expire_in || '15m') as SignOptions['expiresIn']
+  );
+
+  return newAccessToken;
+};
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
   forgetPasswordToDB,
   resetPasswordToDB,
   changePasswordToDB,
+  refreshTokenToDB,
 };

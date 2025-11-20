@@ -24,7 +24,27 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'User logged in successfully.',
-    data: result.createToken,
+    data: {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
+  });
+});
+
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const authHeader = req.headers.authorization;
+  const tokenFromHeader =
+    authHeader && authHeader.startsWith('Bearer')
+      ? authHeader.split(' ')[1]
+      : undefined;
+  const token = (req.body?.refreshToken as string) || tokenFromHeader || '';
+  const newAccessToken = await AuthService.refreshTokenToDB(token);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Access token refreshed successfully.',
+    data: { accessToken: newAccessToken },
   });
 });
 
@@ -72,4 +92,5 @@ export const AuthController = {
   forgetPassword,
   resetPassword,
   changePassword,
+  refreshToken,
 };
