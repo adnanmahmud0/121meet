@@ -14,6 +14,10 @@ export default {
     jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,
     jwt_refresh_expire_in: process.env.JWT_REFRESH_EXPIRE_IN,
   },
+  agora: {
+    app_id: process.env.AGORA_APP_ID,
+    app_certificate: process.env.AGORA_APP_CERTIFICATE,
+  },
   email: {
     from: process.env.EMAIL_FROM,
     user: process.env.EMAIL_USER,

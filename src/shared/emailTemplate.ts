@@ -62,4 +62,31 @@ const resetPassword = (values: IResetPassword) => {
 export const emailTemplate = {
   createAccount,
   resetPassword,
+  meetingInvite: (values: {
+    to: string;
+    title: string;
+    meetingType: string;
+    startTime?: Date;
+    endTime?: Date;
+    joinLink: string;
+    warning: string;
+  }) => {
+    const start = values.startTime
+      ? new Date(values.startTime).toLocaleString()
+      : undefined;
+    const end = values.endTime ? new Date(values.endTime).toLocaleString() : undefined;
+    const html = `<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%); margin: 0; padding: 40px 20px; color: #e0e0e0;">
+    <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #1a1a2e; border-radius: 12px; border: 1px solid #2d3561; box-shadow: 0 8px 32px rgba(0, 169, 255, 0.1);">
+        <h2 style="color: #00a9ff; font-size: 22px; margin: 0 0 16px 0; text-align: center; font-weight: 600;">${values.title}</h2>
+        <p style="color:#b0b0b0; text-align:center;">Type: ${values.meetingType}</p>
+        ${start ? `<p style=\"color:#b0b0b0; text-align:center;\">Start: ${start}</p>` : ''}
+        ${end ? `<p style=\"color:#b0b0b0; text-align:center;\">End: ${end}</p>` : ''}
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${values.joinLink}" style="display:inline-block; background: linear-gradient(135deg, #00a9ff 0%, #0088cc 100%); color:white; padding: 12px 20px; border-radius: 8px; text-decoration:none;">Join Meeting</a>
+        </div>
+        <p style="color:#808080; font-size: 12px; text-align:center;">${values.warning}</p>
+    </div>
+    </body>`;
+    return { to: values.to, subject: 'Meeting Invitation - TechFlow', html };
+  },
 }
