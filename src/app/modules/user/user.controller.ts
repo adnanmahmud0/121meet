@@ -2,13 +2,17 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import { getSingleFilePath } from '../../../shared/getFilePath';
+import ApiError from '../../../errors/ApiError';
 import sendResponse from '../../../shared/sendResponse';
 import { UserService } from './user.service';
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { ...userData } = req.body;
-    const result = await UserService.createUserToDB(userData);
+    const image = getSingleFilePath(req.files, 'image');
+    if (!image) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Profile image is required');
+    }
+    const result = await UserService.createUserToDB({ ...req.body, image });
 
     sendResponse(res, {
       success: true,

@@ -26,6 +26,13 @@ router
 router
   .route('/register')
   .post(
+    fileUploadHandler(),
+    (req: Request, res: Response, next: NextFunction) => {
+      if (req.body.data) {
+        req.body = JSON.parse(req.body.data);
+      }
+      next();
+    },
     validateRequest(UserValidation.createUserZodSchema),
     UserController.createUser
   );
