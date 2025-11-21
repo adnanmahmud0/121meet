@@ -47,4 +47,36 @@ const myMeetings = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const MeetingController = { createMeeting, joinMeeting, myMeetings };
+const closeMeeting = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const meetingId = req.params.meetingId;
+  const result = await MeetingService.closeMeetingToDB(user, meetingId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Meeting closed successfully',
+    data: result,
+  });
+});
+
+const deleteMeeting = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const meetingId = req.params.meetingId;
+  const result = await MeetingService.deleteMeetingToDB(user, meetingId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Meeting deleted successfully',
+    data: result,
+  });
+});
+
+export const MeetingController = {
+  createMeeting,
+  joinMeeting,
+  myMeetings,
+  closeMeeting,
+  deleteMeeting,
+};

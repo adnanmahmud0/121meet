@@ -11,6 +11,8 @@ export type IMeeting = {
   endTime?: Date;
   roomId: string;
   joinLink: string;
+  isClosed?: boolean;
+  closedAt?: Date;
 };
 
 export type MeetingModel = {

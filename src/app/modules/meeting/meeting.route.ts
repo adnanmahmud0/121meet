@@ -25,4 +25,16 @@ router.get(
   MeetingController.myMeetings
 );
 
+router.patch(
+  '/:meetingId/close',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
+  MeetingController.closeMeeting
+);
+
+router.delete(
+  '/:meetingId',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
+  MeetingController.deleteMeeting
+);
+
 export const MeetingRoutes = router;

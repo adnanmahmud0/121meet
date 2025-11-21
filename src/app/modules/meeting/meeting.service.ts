@@ -119,7 +119,8 @@ const getMyMeetingsToDB = async (user: JwtPayload) => {
 
   const mapped = meetings.map(m => {
     let status: 'upcoming' | 'ongoing' | 'completed' = 'ongoing';
-    if (m.meetingType === 'scheduled' && m.startTime && m.endTime) {
+    if (m.isClosed) status = 'completed';
+    else if (m.meetingType === 'scheduled' && m.startTime && m.endTime) {
       if (now < m.startTime) status = 'upcoming';
       else if (now > m.endTime) status = 'completed';
       else status = 'ongoing';
@@ -147,8 +148,40 @@ const getMyMeetingsToDB = async (user: JwtPayload) => {
   return mapped;
 };
 
+const closeMeetingToDB = async (user: JwtPayload, meetingId: string) => {
+  const meeting = await Meeting.findOne({ roomId: meetingId });
+  if (!meeting) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Meeting not found');
+  }
+  if (String(meeting.creator) !== String(user.id)) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Only creator can close');
+  }
+  const now = new Date();
+  meeting.isClosed = true;
+  meeting.closedAt = now;
+  if (meeting.meetingType === 'scheduled') {
+    if (!meeting.endTime || meeting.endTime > now) meeting.endTime = now;
+  }
+  await meeting.save();
+  return { roomId: meeting.roomId, closedAt: meeting.closedAt };
+};
+
+const deleteMeetingToDB = async (user: JwtPayload, meetingId: string) => {
+  const meeting = await Meeting.findOne({ roomId: meetingId });
+  if (!meeting) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Meeting not found');
+  }
+  if (String(meeting.creator) !== String(user.id)) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Only creator can delete');
+  }
+  await Meeting.deleteOne({ _id: meeting._id });
+  return { roomId: meeting.roomId };
+};
+
 export const MeetingService = {
   createMeetingToDB,
   getAgoraAccessTokenFromDB,
   getMyMeetingsToDB,
+  closeMeetingToDB,
+  deleteMeetingToDB,
 };
