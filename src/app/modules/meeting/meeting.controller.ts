@@ -35,4 +35,16 @@ const joinMeeting = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const MeetingController = { createMeeting, joinMeeting };
+const myMeetings = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const meetings = await MeetingService.getMyMeetingsToDB(user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Meetings fetched successfully',
+    data: { meetings },
+  });
+});
+
+export const MeetingController = { createMeeting, joinMeeting, myMeetings };

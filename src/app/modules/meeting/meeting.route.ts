@@ -19,4 +19,10 @@ router.get(
   MeetingController.joinMeeting
 );
 
+router.get(
+  '/my-meetings',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
+  MeetingController.myMeetings
+);
+
 export const MeetingRoutes = router;

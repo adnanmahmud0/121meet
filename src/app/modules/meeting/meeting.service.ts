@@ -109,7 +109,46 @@ const getAgoraAccessTokenFromDB = async (
   return { token, channelName };
 };
 
+const getMyMeetingsToDB = async (user: JwtPayload) => {
+  const now = new Date();
+  const meetings = await Meeting.find({
+    $or: [{ creator: user.id }, { participant: user.id }],
+  })
+    .populate('creator', 'name email')
+    .populate('participant', 'name email');
+
+  const mapped = meetings.map(m => {
+    let status: 'upcoming' | 'ongoing' | 'completed' = 'ongoing';
+    if (m.meetingType === 'scheduled' && m.startTime && m.endTime) {
+      if (now < m.startTime) status = 'upcoming';
+      else if (now > m.endTime) status = 'completed';
+      else status = 'ongoing';
+    }
+    return {
+      creator: {
+        id: String(m.creator._id),
+        name: (m as any).creator.name,
+        email: (m as any).creator.email,
+      },
+      participant: {
+        id: String(m.participant._id),
+        name: (m as any).participant.name,
+        email: (m as any).participant.email,
+      },
+      meetingType: m.meetingType,
+      startTime: m.startTime || null,
+      endTime: m.endTime || null,
+      roomId: m.roomId,
+      joinLink: m.joinLink,
+      status,
+    };
+  });
+
+  return mapped;
+};
+
 export const MeetingService = {
   createMeetingToDB,
   getAgoraAccessTokenFromDB,
+  getMyMeetingsToDB,
 };
