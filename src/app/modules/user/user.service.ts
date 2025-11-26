@@ -6,6 +6,7 @@ import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
+import QueryBuilder from '../../builder/QueryBuilder';
 import { IUser } from './user.interface';
 import { User } from './user.model';
 
@@ -74,8 +75,22 @@ const updateProfileToDB = async (
   return updateDoc;
 };
 
+const getAllUsersFromDB = async (query: Record<string, unknown>) => {
+  const qb = new QueryBuilder(User.find({ status: 'active' }), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const users = await qb.modelQuery;
+  const pagination = await qb.getPaginationInfo();
+
+  return { users, pagination };
+};
+
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
+  getAllUsersFromDB,
 };
