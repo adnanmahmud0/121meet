@@ -18,6 +18,14 @@ export default {
     app_id: process.env.AGORA_APP_ID,
     app_certificate: process.env.AGORA_APP_CERTIFICATE,
   },
+  google: {
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+    calendar_id: process.env.GOOGLE_CALENDAR_ID,
+    service_account_credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  },
   email: {
     from: process.env.EMAIL_FROM,
     user: process.env.EMAIL_USER,
